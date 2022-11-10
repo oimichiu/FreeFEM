@@ -1,0 +1,11 @@
+// Uniform mesh adaptation
+// Mesh 
+mesh Th = square(2, 2);		// initial mesh
+plot(Th, wait=true);
+
+Th = adaptmesh(Th, 1./30., IsMetric=1, nbvx=10000);
+plot(Th, wait=true);
+
+Th = adaptmesh(Th, 1./30., IsMetric=1, nbvx=10000);	// More than one time due to the adaptation bound 'maxsubdiv='
+Th = adaptmesh(Th, 1./30., IsMetric=1, nbvx=10000);
+plot(Th, wait=true);
