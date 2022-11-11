@@ -1,0 +1,35 @@
+// Solution by Discontinous Galerkin
+
+// Mesh
+border C(t=0., 2.*pi){x = cos(t); y = sin(t);};
+mesh Th = buildmesh(C(100));
+
+// Finite element space
+fespace Vh(Th, P1);     // P1, P2, P0, P1dc, P2dc uncond stable
+
+Vh vh, vo, u1 = y, u2 = -x, v = exp(-10*((x-0.3)^2 + (y-0.3)^2));
+real dt = 0.03, t = 0, tmax = 2*pi, al = 0.5, alp = 200;
+
+problem  A(v,vh) = int2d(Th)(v*vh/dt-v*(u1*dx(vh)+u2*dy(vh)))
+  + intalledges(Th)(vh*(mean(v)*(N.x*u1+N.y*u2)
+                   +alp*jump(v)*abs(N.x*u1+N.y*u2)))
+  + int1d(Th,1)(((N.x*u1+N.y*u2)>0)*(N.x*u1+N.y*u2)*v*vh)
+  - int2d(Th)(vo*vh/dt);
+
+varf Adual(v,vh) = int2d(Th)((v/dt+(u1*dx(v)+u2*dy(v)))*vh)
+  + intalledges(Th)((1-nTonEdge)*vh*(al*abs(N.x*u1+N.y*u2)
+                             -(N.x*u1+N.y*u2)/2)*jump(v));
+
+varf rhs(vo,vh) = int2d(Th)(vo*vh/dt);
+real[int] viso = [-0.1,0,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1,1.1];
+
+matrix AA=Adual(Vh,Vh,solver=GMRES);
+matrix BB=rhs(Vh,Vh);
+
+for ( t=0; t< tmax ; t+=dt)
+{
+   vo[]=v[];
+   vh[]=BB*vo[];
+   v[]=AA^-1*vh[];
+   plot(v,fill=0,viso=viso,cmm=" t="+t + ", min=" + v[].min + ", max=" +  v[].max);
+};
