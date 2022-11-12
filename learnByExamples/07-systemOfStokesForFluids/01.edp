@@ -1,0 +1,34 @@
+// The system of Stokes for Fluids
+// Paramters
+int nn = 30;
+
+// Mesh
+mesh Th = square(nn, nn);
+
+// Finite element space
+fespace Uh(Th, P1b);
+Uh u, v;
+Uh uu, vv;
+
+fespace Ph(Th, P1);
+Ph p, pp;
+
+// Problem
+solve stokes ([u, v, p], [uu, vv, pp])
+    = int2d(Th)(
+        dx(u)*dx(uu)
+        + dy(u)*dy(uu)
+        + dx(v)*dx(vv)
+        + dy(v)*dy(vv)
+        + dx(p)*uu
+        + dy(p)*vv
+        + pp*(dx(u) + dy(v))
+        - 1e-10*p*pp
+    )
+    + on(1, 2, 4, u=0, v=0)
+    + on(3, u=1, v=0)
+    ;
+
+// Plot
+plot([u, v], wait=1, ps="01-velocityVectors.eps", value=1);
+plot(p, wait=1, fill=1, ps="01-pressureDistribution.eps", value=1);
