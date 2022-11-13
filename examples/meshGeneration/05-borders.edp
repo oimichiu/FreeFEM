@@ -1,0 +1,50 @@
+{
+    int upper = 1;
+    int others = 2;
+    int inner = 3;
+
+    border C01(t=0, 1){x=0; y=-1+t; label=upper;}
+    border C02(t=0, 1){x=1.5-1.5*t; y = -1; label=upper;}
+    border C03(t=0, 1){x=1.5; y=-t; label=upper;}
+    border C04(t=0, 1){x=1+0.5*t; y = 0; label = others;}
+    border C05(t=0, 1){x=0.5+0.5*t; y = 0; label = others;}
+    border C06(t=0, 1){x=0.5*t; y=0; label = others;}
+    border C11(t=0, 1){x=0.5; y = -0.5*t; label = inner;}
+    border C12(t=0, 1){x=0.5+0.5*t; y = -0.5; label=inner;}
+    border C13(t=0, 1){x=1; y = -0.5+0.5*t; label = inner;}
+
+    int n = 10;
+    plot(C01(-n) + C02(-n) + C03(-n) + C04(-n) + C05(-n)
+       + C06(-n) + C11(n) + C12(n) + C13(n), wait = true);
+
+    mesh Th = buildmesh(C01(-n) + C02(-n) + C03(-n) + C04(-n) + C05(-n)
+    + C06(-n) + C11(n) + C12(n) + C13(n));
+
+    plot(Th, wait=true);
+
+    cout << "Part 1 has region number " << Th(0.75, -0.25).region << endl;
+    cout << "Part 2 has region number " << Th(0.25, -0.25).region << endl;
+}
+
+{
+    int m = 50;
+    int q = 30;
+
+    border a(t=0, 2*pi){x=cos(t); y=sin(t); label = 1;}
+    border b(t=0, 2*pi){x=0.3+0.3*cos(t); y=0.3*sin(t); label=2;}
+
+    plot(a(m) + b(q));      // to see a plot of the border mesh
+    
+    mesh ThWithoutHole = buildmesh(a(m) + b(q));
+    mesh ThWithHole = buildmesh(a(m) + b(-q));
+
+    plot(ThWithoutHole, wait=1);
+    plot(ThWithHole, wait = 1);
+}
+
+{
+    real r = 1;
+    border a(t=0, 2*pi){x=r*cos(t); y=r*sin(t); label=1;}
+    r = 0.3;
+    border b(t=0, 2*pi){x=r*cos(t); y = r*sin(t); label = 1;}
+}
