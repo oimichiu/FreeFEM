@@ -1,0 +1,49 @@
+// Finite Element analysis
+// Parameters
+func  f = 1 + x - y;
+
+// Mesh 
+mesh Th = square(10, 10);
+
+// Fespace
+fespace Vh(Th, P1);
+int n = Vh.ndof;
+int n1 = n+1;
+Vh uh, vh;
+
+// Problem
+varf va(uh, vh)
+	= int2d(Th)(
+		  dx(uh)*dx(vh)
+		+ dy(uh)*dy(vh)
+		)
+		;
+		
+varf vL (uh, vh) = int2d(Th)(f*vh);
+varf vb (uh, vh) = int2d(Th)(1.*vh);
+
+matrix A = va(Vh, Vh);
+real[int] b = vL(0, Vh);
+real[int] B = vb(0, Vh);
+
+// Block matrix
+matrix AA = [ [A, B], [B', 0] ];
+set(AA, solver=sparsesolver);
+
+real[int] bb(n+1), xx(n+1), b1(1), l(1);
+b1 = 0;
+
+// Builds the roght hand side block
+bb = [b, b1];
+
+// Solve
+xx = AA^-1 * bb;
+
+// Set values
+[uh[], l] = xx;
+
+// Display
+cout << " l = " << l(0) << " , b(u, 1) =" << B'*uh[] << endl;
+
+// Plot
+plot(uh, fill = 1, ps="02-Lagrange Multipliers.eps", value=1);
