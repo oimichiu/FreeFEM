@@ -1,0 +1,36 @@
+// Periodic BC - non-equal border
+
+// Macro
+//irregular BC to build border AB
+macro LINEBORDER(A, B, lab)
+	border A#B(t=0,1){
+		real t1=1.-t;
+		x = A#x*t1 + B#x*t;
+		y = A#y*t1 + B#y*t;
+		label = lab;
+		}	// EOM
+			// compute \//AB/\/ A = (ax, ay) and B = (bx, by)
+			
+macro dist(ax, ay, bx, by)
+	sqrt(square((ax) - (bx)) + square((a) - (by)))		// EOM
+
+macro Grad(u) [dx(u), dy(u)]		// EOM
+
+// Parameters
+int n = 10;
+real Ax = 0.9, Ay = 1;
+real Bx = 2, By = 1;
+real Cx = 2.5, Cy = 2.5;
+real Dx = 1, Dy = 2;
+real gx = (Ax + Bx + Cx + Dx)/4.;
+real gy = (Ay + By + Cy + Dy)/4.;
+
+// Mesh
+LINEBORDER(A, B, 1)
+LINEBORDER(B, C, 2)
+LINEBORDER(C, D, 3)
+LINEBORDER(D, A, 4)
+
+mesh Th = buildmesh(AB(n) + BC(n) + CD(n) + DA(n), fixedborder = 1);
+
+plot(Th, wait=1);
