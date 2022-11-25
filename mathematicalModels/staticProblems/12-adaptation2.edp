@@ -1,0 +1,60 @@
+// Adaptation using residual error indicator
+// Parameters
+real hinit = 0.2;	//initial mesh size
+func f = (x-y);
+
+// Mesh
+border ba(t=0, 1.0){x = t; y = 0; label = 1;}
+border bb(t=0, 0.5){x = 1; y = t; label = 2;}
+border bc(t=0, 0.5){x = 1-t; y = 0.5; label = 3;}
+border bd(t=0.5, 1){x = 0.5; y = t; label = 4;}
+border be(t=0.5, 1){x = 1-t; y = 1; label = 5;}
+border bf(t=0.0, 1){x = 0; y = 1-t; label = 6;}
+
+mesh Th = buildmesh(ba(6) + bb(4) + bc(4) + bd(4) + be(4) + bf(6));
+
+// Fespace
+fespace Vh(Th, P1);		// for the mesh size and solution
+Vh h = hinit;			// the Fe function for the mesh size
+Vh u, v;
+
+fespace Ph(Th, P0);		// for the error indicator
+
+// Build a mesh with the given mesh size hinit
+Th = adaptmesh(Th, h, IsMetric=1, splitpbedge=1, nbvx = 10000);
+plot(Th, wait = 1);
+
+// Problem
+problem Poisson (u, v)
+	= int2d(Th, qforder = 5)(
+		u*v*1.0e-10
+		+ dx(u)*dx(v)
+		+ dy(u)*dy(v)
+	)
+	- int2d(Th, qforder = 5)(
+		f*v
+	)
+	;
+	
+varf indicator2(unused, chiK)
+	= intalledges(Th)(
+		chiK*lenEdge*square(jump(N.x*dx(u) + N.y*dy(u)))
+	)
+	+ int2d(Th)(
+		chiK*square(hTriangle*(f + dxx(u) + dyy(u)))
+	)
+	;
+	
+// Mesh adaptation loop
+for (int i = 0; i < 10; i++){
+	u = u;
+	
+	//Solve
+	Poisson;
+	plot(Th, u, wait=1);
+	
+	real cc = 0.8;
+	if (i > 5) cc = 1;
+	ReMeshIndicator(Th, Ph, Vh, indicator2, cc);
+	plot(Th, wait = 1);
+}
