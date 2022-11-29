@@ -1,0 +1,16 @@
+// Free boundary problem
+// Parameters
+real L = 10;		//length
+real hr = 2.1;		//left height
+real hl = 0.35;		//right height
+int n = 4;
+
+// Mesh
+border a(t=0, L){x=t; y=0;};		//bottom: Gamma_a
+border b(t=0, hr){x=L; y=t;};		//right: Gamma_b
+border f(t=L, 0){x=t; y=t*(hr-hl)/L+hl;}		//free surface: Gamma_f
+border d(t=hl, 0){x=0; y=t;};		//left: Gamma_d
+
+mesh Th = buildmesh(a(10*n) + b(6*n) + f(8*n) + d(3*n));
+
+plot(Th, wait=1, cmm="Mesh Definition");
