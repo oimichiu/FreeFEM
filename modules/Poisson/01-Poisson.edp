@@ -1,0 +1,32 @@
+// Parameters
+func f=1.;
+
+// Mesh
+int nn = 25;		// Mesh quality
+mesh Th = square(nn, nn);
+
+// Fespace
+func Pk = P2;
+fespace Uh(Th, Pk);
+Uh u;
+
+// Macro
+macro grad(A) [dx(A), dy(A)] //
+
+// Problem
+varf vPoisson (u, uh)
+	= int2d(Th)(
+		grad(u)' * grad(uh)
+	)
+	+ int2d(Th)(
+		f * uh
+	)
+	+ on(1, 2, 3, 4, u=0)
+	;
+	
+matrix<real> Poisson = vPoisson(Uh, Uh, solver=sparsesolver);
+real[int] PoissonBoundary = vPoisson(0, Uh);
+u[] = Poisson^-1 * PoissonBoundary;
+
+// Plot
+plot(u, nbiso = 30, fill=1, value=1, cmm="A");
